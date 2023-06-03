@@ -43,3 +43,9 @@ feeding_menu = InlineKeyboardMarkup(row_width=1).add(new_diet, body_index, to_me
 # -- Профиль --
 
 profile_menu = InlineKeyboardMarkup(row_width=1).add(to_menu)
+
+# -- Администратор --
+
+admin_send = InlineKeyboardButton('Отправить сообщение', callback_data='send_button')
+admin_download = InlineKeyboardButton('Выгрузить базу', callback_data='download')
+admin_menu = InlineKeyboardMarkup(row_width=1).add(admin_send, admin_download)

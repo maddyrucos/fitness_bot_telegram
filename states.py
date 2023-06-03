@@ -6,3 +6,8 @@ class Training(StatesGroup):
     height = State()
     weight = State()
     active_training = State()
+
+class Admin(StatesGroup):
+
+    default = State()
+    sending_message = State()
