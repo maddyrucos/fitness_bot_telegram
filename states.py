@@ -7,6 +7,12 @@ class Training(StatesGroup):
     weight = State()
     active_training = State()
 
+
+class Profile(StatesGroup):
+
+    default = State()
+    get_value = State()
+
 class Admin(StatesGroup):
 
     default = State()

@@ -5,6 +5,7 @@ import os
 import Database.database as db
 from Training import training
 from IMB import feeding
+import profile
 
 from states import Training
 import markups as mks
@@ -23,13 +24,12 @@ async def on_startup(_):
 @dp.message_handler(commands=['start'], state='*')
 async def command_start(message: types.Message):
 
-    ''' Удаление сообщения '/start' от пользователя
+    '''# Удаление сообщения '/start' от пользователя
     try:
         await message.delete()
     except:
         pass
     '''
-
 
     # Сбор данных о пользователе
     user_id = message.from_user.id
@@ -42,11 +42,13 @@ async def command_start(message: types.Message):
     await Training.default.set()
 
     # Приветственное сообщение
-    welcomeText = (f'Привет, {message.from_user.first_name}! Я карманный фитнес тренер. '
-                   f'С моей помощью ты сможешь составить себе программу тренировок, '
-                   f'рацион питания и следить за своим здоровьем!')
-    await bot.send_message(message.from_user.id, welcomeText,
-                           reply_markup=mks.main_menu)
+    welcomeText = (f'👋 Привет, <b>{message.from_user.first_name}</b>!\n'
+                   f'🏋️ Я карманный <i>фитнес тренер</i>. '
+                   f'С моей помощью ты сможешь:\n'
+                   f'💪 Выбрать программу тренировок\n'
+                   f'✍️ Составить рацион питания\n'
+                   f'❤️ Следить за своим здоровьем')
+    await bot.send_message(message.from_user.id, welcomeText, parse_mode = "HTML", reply_markup=mks.main_menu)
 
 
 # Хендлер, который срабатывает при вводе пользователем "/admin"
@@ -57,7 +59,8 @@ async def admin(message: types.Message):
     await db.check_admin(bot, dp, message.from_user.username, message.from_user.id)
 
 
-# Хендлер, который срабатывает при нажатии пользователем кнопки, которая имеет callback "main_menu", далее по аналогии
+# Хендлер, который срабатывает при нажатии пользователем кнопки, которая имеет callback "main_menu",
+# далее по аналогии
 @dp.callback_query_handler(lambda c: c.data == 'main_menu', state = '*')
 async def main_menu(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
@@ -68,7 +71,7 @@ async def main_menu(callback_query: types.CallbackQuery):
     # Стандартное состояние
     await Training.default.set()
 
-    await callback_query.message.answer("Главное меню", reply_markup=mks.main_menu)
+    await callback_query.message.answer("🏠 Главное меню", reply_markup=mks.main_menu)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'trainings', state = '*')
@@ -80,8 +83,10 @@ async def trainings_menu(callback_query: types.CallbackQuery):
     path = os.getcwd()
     # Вызов функции, инициализирующей тренировки
     await training.init_trainings(dp, path)
-
-    await callback_query.message.answer("Раздел с тренировками.\nЯ буду следить за твоими тренировками.\nЕсли у тебя еще нет программы, я помогу её составить!", reply_markup=mks.trainings_menu)
+    await callback_query.message.answer("💪 Раздел с тренировками.\n"
+                                        "👀 Я буду следить за твоими тренировками.\n️️"
+                                        "✍️ Если у тебя еще нет программы, я помогу её составить!",
+                                        reply_markup=mks.trainings_menu)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'feeding', state='*')
@@ -89,21 +94,20 @@ async def feeding_menu(callback_query: types.CallbackQuery):
 
     await callback_query.message.delete()
 
-    await callback_query.message.answer("Здесь хранится твой рацион питания.\nЯ готов составить тебе меню на день или неделю!", reply_markup=mks.feeding_menu)
+    await callback_query.message.answer("🍔 Здесь хранится твой рацион питания.\n"
+                                        "✍️ Я готов составить тебе меню на день или неделю!",
+                                        reply_markup=mks.feeding_menu)
 
     await feeding.get_height_weight(dp)
 
-''' 
---- !Пока не сделано! ---
 
 @dp.callback_query_handler(lambda c: c.data == 'profile', state='*')
 async def profile_menu(callback_query: types.CallbackQuery):
 
     await callback_query.message.delete()
 
-    await callback_query.message.answer('Профиль', reply_markup=mks.profile_menu)
+    await profile.profile(dp, callback_query)
 
-'''
 
 if __name__ == '__main__':
     executor.start_polling(dp,
