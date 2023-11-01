@@ -26,7 +26,7 @@ async def init_trainings(dp, path):
 
         try:
             # Открытие файла тренировки через путь, который берется из БД
-            with open(f'{path}\Training\Trainings\\{training_info[0]}\\{training_info[1]}\\{training_info[2]}.txt', encoding="utf-8") as file:
+            with open(f'{path}/Training/Trainings/{training_info[0]}/{training_info[1]}/{training_info[2]}.txt', encoding="utf-8") as file:
                 lines = file.readlines()
 
                 # Сохранение данных о тренировке в хранилище
@@ -134,7 +134,6 @@ async def init_trainings(dp, path):
 
             iteration_message = await callback_query.message.answer(f'⏳ Отдых - {line[iteration]} сек.', reply_markup=mks.active_training_skip_timer_menu)
             await exercise_message.edit_reply_markup(None)
-
             # Цикл на отдых (от кол-ва секунд отдыха до нуля)
             for seconds in range(int(line[iteration])-1, 0, -1):
 
@@ -218,7 +217,7 @@ async def init_trainings(dp, path):
 
         await callback_query.message.delete()
 
-        categories_of_trainings_list = os.listdir(f'{path}\Training\Trainings')
+        categories_of_trainings_list = os.listdir(f'{path}/Training/Trainings')
         categories_of_trainings_menu = InlineKeyboardMarkup(row_width=1)
 
         for category in categories_of_trainings_list:
@@ -240,7 +239,7 @@ async def show_categories(dp, category, path):
 
         await callback_query.message.delete()
 
-        trainings_list = os.listdir(f'{path}\Training\Trainings\\{category}')
+        trainings_list = os.listdir(f'{path}/Training/Trainings/{category}')
         trainings_list_menu = InlineKeyboardMarkup(row_width=1)
 
         for training in trainings_list:
@@ -265,12 +264,12 @@ async def show_trainings(dp, training, category, path):
 
         training_info = ''
 
-        days_list = os.listdir(f'{path}\Training\Trainings\\{category}\\{training}')
-
+        days_list = os.listdir(f'{path}/Training/Trainings/{category}/{training}')
+        await state.update_data(category = category, training = training)
         for day in days_list:
 
             training_info += (f'\n\n<b>День цикла <u>№{day.split(".")[0]}</u></b>\n\n')
-            with open(f'{path}\Training\Trainings\\{category}\\{training}\\{day}',  encoding="utf-8") as day_of_training:
+            with open(f'{path}/Training/Trainings/{category}/{training}/{day}',  encoding="utf-8") as day_of_training:
 
                 excercises = day_of_training.readlines()
 
@@ -285,8 +284,10 @@ async def show_trainings(dp, training, category, path):
 
 
     @dp.callback_query_handler(lambda c: c.data == 'apply_training', state='*')
-    async def categories(callback_query: CallbackQuery, state: FSMContext):
-
+    async def apply_training(callback_query: CallbackQuery, state: FSMContext):
+        data = await state.get_data()
+        category = data['category']
+        training = data['training']
         db.set_training(callback_query.from_user.id, category, training, '1')
 
         await callback_query.message.delete()
